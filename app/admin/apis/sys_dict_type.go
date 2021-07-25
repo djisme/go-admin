@@ -1,14 +1,13 @@
 package apis
 
 import (
-	"github.com/gin-gonic/gin/binding"
-	"go-admin/app/admin/models"
-	"net/http"
-
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/go-admin-team/go-admin-core/sdk/api"
 	"github.com/go-admin-team/go-admin-core/sdk/pkg/jwtauth/user"
 	_ "github.com/go-admin-team/go-admin-core/sdk/pkg/response"
+	"go-admin/app/admin/models"
 
 	"go-admin/app/admin/service"
 	"go-admin/app/admin/service/dto"
@@ -32,7 +31,7 @@ type SysDictType struct {
 // @Security Bearer
 func (e SysDictType) GetPage(c *gin.Context) {
 	s := service.SysDictType{}
-	req := dto.SysDictTypeSearch{}
+	req :=dto.SysDictTypeGetPageReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, binding.Form).
@@ -63,7 +62,7 @@ func (e SysDictType) GetPage(c *gin.Context) {
 // @Security Bearer
 func (e SysDictType) Get(c *gin.Context) {
 	s := service.SysDictType{}
-	req := dto.SysDictTypeById{}
+	req :=dto.SysDictTypeGetReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, nil).
@@ -89,14 +88,13 @@ func (e SysDictType) Get(c *gin.Context) {
 // @Tags 字典类型
 // @Accept  application/json
 // @Product application/json
-// @Param data body dto.SysDictTypeControl true "data"
-// @Success 200 {string} string	"{"code": 200, "message": "添加成功"}"
-// @Success 200 {string} string	"{"code": -1, "message": "添加失败"}"
+// @Param data body dto.SysDictTypeInsertReq true "data"
+// @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
 // @Router /api/v1/dict/type [post]
 // @Security Bearer
 func (e SysDictType) Insert(c *gin.Context) {
 	s := service.SysDictType{}
-	req := dto.SysDictTypeControl{}
+	req :=dto.SysDictTypeInsertReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, binding.JSON).
@@ -111,7 +109,7 @@ func (e SysDictType) Insert(c *gin.Context) {
 	err = s.Insert(&req)
 	if err != nil {
 		e.Logger.Error(err)
-		e.Error(500, err, "创建失败")
+		e.Error(500, err,fmt.Sprintf(" 创建字典类型失败，详情：%s", err.Error()))
 		return
 	}
 	e.OK(req.GetId(), "创建成功")
@@ -123,21 +121,20 @@ func (e SysDictType) Insert(c *gin.Context) {
 // @Tags 字典类型
 // @Accept  application/json
 // @Product application/json
-// @Param data body dto.SysDictTypeControl true "body"
-// @Success 200 {string} string	"{"code": 200, "message": "添加成功"}"
-// @Success 200 {string} string	"{"code": -1, "message": "添加失败"}"
+// @Param data body dto.SysDictTypeUpdateReq true "body"
+// @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
 // @Router /api/v1/dict/type/{dictId} [put]
 // @Security Bearer
 func (e SysDictType) Update(c *gin.Context) {
 	s := service.SysDictType{}
-	req := dto.SysDictTypeControl{}
+	req :=dto.SysDictTypeUpdateReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, binding.JSON, nil).
 		MakeService(&s.Service).
 		Errors
 	if err != nil {
-		e.Error(http.StatusInternalServerError, err, err.Error())
+		e.Error(500, err, err.Error())
 		e.Logger.Error(err)
 		return
 	}
@@ -154,13 +151,13 @@ func (e SysDictType) Update(c *gin.Context) {
 // @Summary 删除字典类型
 // @Description 删除数据
 // @Tags 字典类型
-// @Param dictId path int true "dictId"
-// @Success 200 {string} string	"{"code": 200, "message": "删除成功"}"
-// @Success 200 {string} string	"{"code": -1, "message": "删除失败"}"
-// @Router /api/v1/dict/type/{dictId} [delete]
+// @Param dictCode body dto.SysDictTypeDeleteReq true "body"
+// @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
+// @Router /api/v1/dict/type [delete]
+// @Security Bearer
 func (e SysDictType) Delete(c *gin.Context) {
 	s := service.SysDictType{}
-	req := dto.SysDictTypeById{}
+	req :=dto.SysDictTypeDeleteReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, binding.JSON, nil).
@@ -192,7 +189,7 @@ func (e SysDictType) Delete(c *gin.Context) {
 // @Security Bearer
 func (e SysDictType) GetAll(c *gin.Context) {
 	s := service.SysDictType{}
-	req := dto.SysDictTypeSearch{}
+	req :=dto.SysDictTypeGetPageReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, binding.Form).
@@ -206,7 +203,7 @@ func (e SysDictType) GetAll(c *gin.Context) {
 	list := make([]models.SysDictType, 0)
 	err = s.GetAll(&req, &list)
 	if err != nil {
-		e.Error(500, err, "查询失败")
+		e.Error(500, err, err.Error())
 		return
 	}
 	e.OK(list, "查询成功")

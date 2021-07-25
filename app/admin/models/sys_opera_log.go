@@ -57,24 +57,32 @@ func SaveOperaLog(message storage.Messager) (err error) {
 	if db == nil {
 		err = errors.New("db not exist")
 		log.Errorf("host[%s]'s %s", message.GetPrefix(), err.Error())
-		return err
+		// Log writing to the database ignores error
+		return nil
 	}
 	var rb []byte
 	rb, err = json.Marshal(message.GetValues())
 	if err != nil {
 		log.Errorf("json Marshal error, %s", err.Error())
-		return err
+		// Log writing to the database ignores error
+		return nil
 	}
 	var l SysOperaLog
 	err = json.Unmarshal(rb, &l)
 	if err != nil {
 		log.Errorf("json Unmarshal error, %s", err.Error())
-		return err
+		// Log writing to the database ignores error
+		return nil
+	}
+	// 超出100个字符返回值截断
+	if len(l.JsonResult) > 100 {
+		l.JsonResult = l.JsonResult[:100]
 	}
 	err = db.Create(&l).Error
 	if err != nil {
 		log.Errorf("db create error, %s", err.Error())
-		return err
+		// Log writing to the database ignores error
+		return nil
 	}
 	return nil
 }

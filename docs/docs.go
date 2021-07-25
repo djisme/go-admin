@@ -30,16 +30,11 @@ var doc = `{
     "paths": {
         "/api/v1/app-config": {
             "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取系统配置信息，主要注意这里不在验证数据权限",
+                "description": "获取系统配置信息，主要注意这里不在验证权限",
                 "tags": [
                     "配置管理"
                 ],
-                "summary": "获取系统前台配置信息，主要注意这里不在验证数据权限",
+                "summary": "获取系统前台配置信息，主要注意这里不在验证权限",
                 "responses": {
                     "200": {
                         "description": "{\"code\": 200, \"data\": [...]}",
@@ -65,11 +60,46 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/captcha": {
+            "get": {
+                "description": "获取验证码",
+                "tags": [
+                    "登陆"
+                ],
+                "summary": "获取验证码",
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        },
+                                        "id": {
+                                            "type": "string"
+                                        },
+                                        "msg": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/db/columns/page": {
             "get": {
                 "description": "数据库表列分页列表 / database table column page list",
                 "tags": [
-                    "工具 / Tools"
+                    "工具 / 生成工具"
                 ],
                 "summary": "分页列表数据 / page list data",
                 "parameters": [
@@ -106,7 +136,7 @@ var doc = `{
             "get": {
                 "description": "数据库表分页列表 / database table page list",
                 "tags": [
-                    "工具 / Tools"
+                    "工具 / 生成工具"
                 ],
                 "summary": "分页列表数据 / page list data",
                 "parameters": [
@@ -154,14 +184,14 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "name",
-                        "name": "name",
+                        "description": "deptName",
+                        "name": "deptName",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "id",
-                        "name": "id",
+                        "description": "deptId",
+                        "name": "deptId",
                         "in": "query"
                     },
                     {
@@ -215,6 +245,11 @@ var doc = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "删除数据",
                 "tags": [
                     "部门"
@@ -435,6 +470,37 @@ var doc = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "删除数据",
+                "tags": [
+                    "字典数据"
+                ],
+                "summary": "删除字典数据",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "dictCode",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.SysDictDataById"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": -1, \"message\": \"删除失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
         "/api/v1/dict/data/{dictCode}": {
@@ -495,35 +561,6 @@ var doc = `{
                 "responses": {
                     "200": {
                         "description": "{\"code\": -1, \"message\": \"添加失败\"}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "删除数据",
-                "tags": [
-                    "字典数据"
-                ],
-                "summary": "删除字典数据",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "dictCode",
-                        "name": "dictCode",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": -1, \"message\": \"删除失败\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -612,6 +649,35 @@ var doc = `{
                 "responses": {
                     "200": {
                         "description": "{\"code\": -1, \"message\": \"添加失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "删除数据",
+                "tags": [
+                    "字典类型"
+                ],
+                "summary": "删除字典类型",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "dictId",
+                        "name": "dictId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": -1, \"message\": \"删除失败\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -724,27 +790,25 @@ var doc = `{
                         }
                     }
                 }
-            },
-            "delete": {
-                "description": "删除数据",
-                "tags": [
-                    "字典类型"
-                ],
-                "summary": "删除字典类型",
-                "parameters": [
+            }
+        },
+        "/api/v1/getinfo": {
+            "get": {
+                "security": [
                     {
-                        "type": "integer",
-                        "description": "dictId",
-                        "name": "dictId",
-                        "in": "path",
-                        "required": true
+                        "Bearer": []
                     }
                 ],
+                "description": "获取JSON",
+                "tags": [
+                    "个人中心"
+                ],
+                "summary": "获取个人信息",
                 "responses": {
                     "200": {
-                        "description": "{\"code\": -1, \"message\": \"删除失败\"}",
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -755,6 +819,9 @@ var doc = `{
                 "description": "获取token\nLoginHandler can be used by clients to get a jwt token.\nPayload needs to be json in the form of {\"username\": \"USERNAME\", \"password\": \"PASSWORD\"}.\nReply will be of the form {\"token\": \"TOKEN\"}.\ndev mode：It should be noted that all fields cannot be empty, and a value of 0 can be passed in addition to the account password\n注意：开发模式：需要注意全部字段不能为空，账号密码外可以传入0值",
                 "consumes": [
                     "application/json"
+                ],
+                "tags": [
+                    "登陆"
                 ],
                 "summary": "登陆",
                 "parameters": [
@@ -806,9 +873,9 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": -1, \"message\": \"抱歉未找到相关信息\"}",
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -821,7 +888,7 @@ var doc = `{
                 ],
                 "description": "获取JSON",
                 "consumes": [
-                    "application/x-www-form-urlencoded"
+                    "application/json"
                 ],
                 "tags": [
                     "菜单"
@@ -829,57 +896,30 @@ var doc = `{
                 "summary": "创建菜单",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "menuName",
-                        "name": "menuName",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Path",
-                        "name": "Path",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Action",
-                        "name": "Action",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Permission",
-                        "name": "Permission",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "ParentId",
-                        "name": "ParentId",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "IsDel",
-                        "name": "IsDel",
-                        "in": "formData",
-                        "required": true
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.SysMenuControl"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": -1, \"message\": \"添加失败\"}",
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "删除数据",
                 "tags": [
                     "菜单"
@@ -898,9 +938,9 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": -1, \"message\": \"删除失败\"}",
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -921,16 +961,16 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "menuName",
-                        "name": "menuName",
-                        "in": "query"
+                        "description": "id",
+                        "name": "id",
+                        "in": "path"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": -1, \"message\": \"抱歉未找到相关信息\"}",
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -943,7 +983,7 @@ var doc = `{
                 ],
                 "description": "获取JSON",
                 "consumes": [
-                    "application/x-www-form-urlencoded"
+                    "application/json"
                 ],
                 "tags": [
                     "菜单"
@@ -969,9 +1009,9 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": -1, \"message\": \"修改失败\"}",
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -986,7 +1026,7 @@ var doc = `{
                 ],
                 "description": "获取JSON",
                 "consumes": [
-                    "application/x-www-form-urlencoded"
+                    "application/json"
                 ],
                 "tags": [
                     "菜单"
@@ -1003,40 +1043,9 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": -1, \"message\": \"添加失败\"}",
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/menuids/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取JSON",
-                "tags": [
-                    "菜单"
-                ],
-                "summary": "获取角色对应的菜单id数组",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": -1, \"message\": \"抱歉未找到相关信息\"}",
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -1056,9 +1065,9 @@ var doc = `{
                 "summary": "根据登录角色名称获取菜单列表数据（左菜单使用）",
                 "responses": {
                     "200": {
-                        "description": "{\"code\": -1, \"message\": \"抱歉未找到相关信息\"}",
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -1132,7 +1141,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.SysPostControl"
+                            "$ref": "#/definitions/dto.SysPostInsertReq"
                         }
                     }
                 ],
@@ -1144,9 +1153,46 @@ var doc = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "删除数据",
+                "tags": [
+                    "岗位"
+                ],
+                "summary": "删除岗位",
+                "parameters": [
+                    {
+                        "description": "请求参数",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.SysPostDeleteReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"message\": \"删除成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "{\"code\": 500, \"message\": \"删除失败\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
-        "/api/v1/post/": {
+        "/api/v1/post/{id}": {
             "put": {
                 "security": [
                     {
@@ -1168,7 +1214,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.SysPostControl"
+                            "$ref": "#/definitions/dto.SysPostUpdateReq"
                         }
                     }
                 ],
@@ -1197,8 +1243,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "postId",
-                        "name": "postId",
+                        "description": "编码",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -1211,40 +1257,15 @@ var doc = `{
                         }
                     }
                 }
-            },
-            "delete": {
-                "description": "删除数据",
-                "tags": [
-                    "岗位"
-                ],
-                "summary": "删除岗位",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"message\": \"删除成功\"}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "{\"code\": 500, \"message\": \"删除失败\"}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
             }
         },
         "/api/v1/public/uploadFile": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "获取JSON",
                 "consumes": [
                     "multipart/form-data"
@@ -1359,9 +1380,9 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": -1, \"message\": \"添加失败\"}",
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -1390,9 +1411,45 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": -1, \"message\": \"删除失败\"}",
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/role-status/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取JSON",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "角色/Role"
+                ],
+                "summary": "更新角色数据权限",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RoleDataScopeReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -1420,9 +1477,9 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": -1, \"message\": \"抱歉未找到相关信息\"}",
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -1454,9 +1511,9 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": -1, \"message\": \"修改失败\"}",
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -1464,6 +1521,11 @@ var doc = `{
         },
         "/api/v1/server-monitor": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "获取JSON",
                 "tags": [
                     "系统信息"
@@ -1911,16 +1973,16 @@ var doc = `{
                         "Bearer": []
                     }
                 ],
-                "description": "获取配置管理",
+                "description": "根据Key获取SysConfig的Service",
                 "tags": [
                     "配置管理"
                 ],
-                "summary": "获取配置管理",
+                "summary": "根据Key获取SysConfig的Service",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "id",
-                        "name": "id",
+                        "description": "configKey",
+                        "name": "configKey",
                         "in": "path"
                     }
                 ],
@@ -1936,7 +1998,7 @@ var doc = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.SysConfig"
+                                            "$ref": "#/definitions/dto.SysConfigByKeyReq"
                                         }
                                     }
                                 }
@@ -1973,6 +2035,127 @@ var doc = `{
                 "responses": {
                     "200": {
                         "description": "{\"code\": 200, \"message\": \"修改成功\"}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sys-login-log": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取JSON",
+                "tags": [
+                    "登录日志"
+                ],
+                "summary": "登录日志列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户名",
+                        "name": "username",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ip地址",
+                        "name": "ipaddr",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "归属地",
+                        "name": "loginLocation",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "开始时间",
+                        "name": "beginTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "结束时间",
+                        "name": "endTime",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "登录日志删除",
+                "tags": [
+                    "登录日志"
+                ],
+                "summary": "登录日志删除",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.SysLoginLogById"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sys-login-log/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取JSON",
+                "tags": [
+                    "登录日志"
+                ],
+                "summary": "登录日志通过id获取",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -2044,14 +2227,19 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": -1, \"message\": \"抱歉未找到相关信息\"}",
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "删除数据",
                 "tags": [
                     "操作日志"
@@ -2070,9 +2258,9 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": -1, \"message\": \"删除失败\"}",
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -2095,25 +2283,172 @@ var doc = `{
                         "type": "string",
                         "description": "id",
                         "name": "id",
-                        "in": "query"
-                    },
-                    {
-                        "description": "ids",
-                        "name": "ids",
-                        "in": "body",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "integer"
-                            }
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sys-user": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取JSON",
+                "tags": [
+                    "用户"
+                ],
+                "summary": "列表用户信息数据",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "username",
+                        "name": "username",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取JSON",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "创建用户",
+                "parameters": [
+                    {
+                        "description": "用户数据",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.SysUserControl"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": -1, \"message\": \"抱歉未找到相关信息\"}",
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sys-user/{userId}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取JSON",
+                "tags": [
+                    "用户"
+                ],
+                "summary": "获取用户",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户编码",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取JSON",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "修改用户数据",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.SysUserControl"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "删除数据",
+                "tags": [
+                    "用户"
+                ],
+                "summary": "删除用户数据",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "userId",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -2131,7 +2466,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工具 - 生成表"
+                    "工具 / 生成工具"
                 ],
                 "summary": "修改表结构",
                 "parameters": [
@@ -2165,7 +2500,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工具 - 生成表"
+                    "工具 / 生成工具"
                 ],
                 "summary": "添加表结构",
                 "parameters": [
@@ -2195,7 +2530,7 @@ var doc = `{
                 ],
                 "description": "获取JSON",
                 "tags": [
-                    "工具 - 生成表"
+                    "工具 / 生成工具"
                 ],
                 "summary": "获取配置",
                 "parameters": [
@@ -2219,7 +2554,7 @@ var doc = `{
             "delete": {
                 "description": "删除表结构",
                 "tags": [
-                    "工具 - 生成表"
+                    "工具 / 生成工具"
                 ],
                 "summary": "删除表结构",
                 "parameters": [
@@ -2245,7 +2580,7 @@ var doc = `{
             "get": {
                 "description": "生成表分页列表",
                 "tags": [
-                    "工具 - 生成表"
+                    "工具 / 生成工具"
                 ],
                 "summary": "分页列表数据",
                 "parameters": [
@@ -2278,159 +2613,19 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/sysUser": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取JSON",
-                "tags": [
-                    "用户"
-                ],
-                "summary": "列表用户信息数据",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "username",
-                        "name": "username",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": -1, \"message\": \"抱歉未找到相关信息\"}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "获取JSON",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "用户"
-                ],
-                "summary": "创建用户",
-                "parameters": [
-                    {
-                        "description": "用户数据",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.SysUserControl"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": -1, \"message\": \"添加失败\"}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/sysUser/{userId}": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取JSON",
-                "tags": [
-                    "用户"
-                ],
-                "summary": "获取用户",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "用户编码",
-                        "name": "userId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"data\": [...]}",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/sysuser/{userId}": {
-            "put": {
-                "description": "获取JSON",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "用户"
-                ],
-                "summary": "修改用户数据",
-                "parameters": [
-                    {
-                        "description": "body",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.SysUserControl"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": -1, \"message\": \"修改失败\"}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "删除数据",
-                "tags": [
-                    "用户"
-                ],
-                "summary": "删除用户数据",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "userId",
-                        "name": "userId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": -1, \"message\": \"删除失败\"}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/user/avatar": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "获取JSON",
                 "consumes": [
                     "multipart/form-data"
                 ],
                 "tags": [
-                    "用户"
+                    "个人中心"
                 ],
                 "summary": "修改头像",
                 "parameters": [
@@ -2444,9 +2639,9 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": -1, \"message\": \"添加失败\"}",
+                        "description": "{\"code\": 200, \"data\": [...]}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -2474,8 +2669,44 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/user/pwd": {
-            "post": {
+        "/api/v1/user/pwd/reset": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取JSON",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "重置用户密码",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResetSysUserPwdReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/pwd/set": {
+            "put": {
                 "security": [
                     {
                         "Bearer": []
@@ -2497,6 +2728,42 @@ var doc = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/dto.PassWord"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": [...]}",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/status": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取JSON",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户"
+                ],
+                "summary": "修改用户状态",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateSysUserStatusReq"
                         }
                     }
                 ],
@@ -2557,6 +2824,49 @@ var doc = `{
                 },
                 "oldPassword": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.ResetSysUserPwdReq": {
+            "type": "object",
+            "required": [
+                "password",
+                "userId"
+            ],
+            "properties": {
+                "createBy": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "description": "用户ID",
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.RoleDataScopeReq": {
+            "type": "object",
+            "required": [
+                "dataScope",
+                "roleId"
+            ],
+            "properties": {
+                "dataScope": {
+                    "type": "string"
+                },
+                "deptIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "roleId": {
+                    "type": "integer"
                 }
             }
         },
@@ -2685,7 +2995,27 @@ var doc = `{
                 },
                 "status": {
                     "description": "状态",
-                    "type": "string"
+                    "type": "integer"
+                },
+                "updateBy": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.SysDictDataById": {
+            "type": "object",
+            "properties": {
+                "createBy": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "updateBy": {
                     "type": "integer"
@@ -2729,7 +3059,7 @@ var doc = `{
                     "type": "string"
                 },
                 "status": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "updateBy": {
                     "type": "integer"
@@ -2755,7 +3085,27 @@ var doc = `{
                     "type": "string"
                 },
                 "status": {
-                    "type": "string"
+                    "type": "integer"
+                },
+                "updateBy": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.SysLoginLogById": {
+            "type": "object",
+            "properties": {
+                "createBy": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "updateBy": {
                     "type": "integer"
@@ -2883,34 +3233,74 @@ var doc = `{
                 }
             }
         },
-        "dto.SysPostControl": {
+        "dto.SysPostDeleteReq": {
+            "type": "object",
+            "properties": {
+                "createBy": {
+                    "type": "integer"
+                },
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "updateBy": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.SysPostInsertReq": {
             "type": "object",
             "properties": {
                 "createBy": {
                     "type": "integer"
                 },
                 "postCode": {
-                    "description": "编码",
                     "type": "string"
                 },
                 "postId": {
-                    "description": "id",
                     "type": "integer"
                 },
                 "postName": {
-                    "description": "名称",
                     "type": "string"
                 },
                 "remark": {
-                    "description": "备注",
                     "type": "string"
                 },
                 "sort": {
-                    "description": "排序",
                     "type": "integer"
                 },
                 "status": {
-                    "description": "状态",
+                    "type": "integer"
+                },
+                "updateBy": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.SysPostUpdateReq": {
+            "type": "object",
+            "properties": {
+                "createBy": {
+                    "type": "integer"
+                },
+                "postCode": {
+                    "type": "string"
+                },
+                "postId": {
+                    "type": "integer"
+                },
+                "postName": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
                     "type": "integer"
                 },
                 "updateBy": {
@@ -2943,6 +3333,12 @@ var doc = `{
                 },
                 "dataScope": {
                     "type": "string"
+                },
+                "deptIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "flag": {
                     "description": "标记",
@@ -2978,6 +3374,12 @@ var doc = `{
                     "description": "状态",
                     "type": "string"
                 },
+                "sysDept": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SysDept"
+                    }
+                },
                 "sysMenu": {
                     "type": "array",
                     "items": {
@@ -2991,6 +3393,14 @@ var doc = `{
         },
         "dto.SysUserControl": {
             "type": "object",
+            "required": [
+                "deptId",
+                "email",
+                "nickName",
+                "phone",
+                "status",
+                "username"
+            ],
             "properties": {
                 "avatar": {
                     "type": "string"
@@ -3026,7 +3436,8 @@ var doc = `{
                     "type": "string"
                 },
                 "status": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "1"
                 },
                 "updateBy": {
                     "type": "integer"
@@ -3037,6 +3448,47 @@ var doc = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.UpdateStatusReq": {
+            "type": "object",
+            "properties": {
+                "createBy": {
+                    "type": "integer"
+                },
+                "roleId": {
+                    "description": "角色编码",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "状态",
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.UpdateSysUserStatusReq": {
+            "type": "object",
+            "required": [
+                "status",
+                "userId"
+            ],
+            "properties": {
+                "createBy": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "description": "用户ID",
+                    "type": "integer"
                 }
             }
         },
@@ -3127,6 +3579,70 @@ var doc = `{
                 },
                 "remark": {
                     "type": "string"
+                },
+                "updateBy": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SysDept": {
+            "type": "object",
+            "properties": {
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SysDept"
+                    }
+                },
+                "createBy": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "dataScope": {
+                    "type": "string"
+                },
+                "deptId": {
+                    "description": "部门编码",
+                    "type": "integer"
+                },
+                "deptName": {
+                    "description": "部门名称",
+                    "type": "string"
+                },
+                "deptPath": {
+                    "type": "string"
+                },
+                "email": {
+                    "description": "邮箱",
+                    "type": "string"
+                },
+                "leader": {
+                    "description": "负责人",
+                    "type": "string"
+                },
+                "params": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "description": "上级部门",
+                    "type": "integer"
+                },
+                "phone": {
+                    "description": "手机",
+                    "type": "string"
+                },
+                "sort": {
+                    "description": "排序",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "状态",
+                    "type": "integer"
                 },
                 "updateBy": {
                     "type": "integer"
@@ -3293,7 +3809,7 @@ var doc = `{
                     "type": "string"
                 },
                 "createBy": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "createdAt": {
                     "type": "string"
@@ -3395,7 +3911,7 @@ var doc = `{
                     "type": "integer"
                 },
                 "updateBy": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "updatedAt": {
                     "type": "string"

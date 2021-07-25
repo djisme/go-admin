@@ -32,7 +32,7 @@ type SysApi struct {
 // @Security Bearer
 func (e SysApi) GetPage(c *gin.Context) {
 	s := service.SysApi{}
-	req := dto.SysApiSearch{}
+	req := dto.SysApiGetPageReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, binding.Form).
@@ -64,7 +64,7 @@ func (e SysApi) GetPage(c *gin.Context) {
 // @Router /api/v1/sys-api/{id} [get]
 // @Security Bearer
 func (e SysApi) Get(c *gin.Context) {
-	req := dto.SysApiById{}
+	req := dto.SysApiGetReq{}
 	s := service.SysApi{}
 	err := e.MakeContext(c).
 		MakeOrm().
@@ -92,12 +92,12 @@ func (e SysApi) Get(c *gin.Context) {
 // @Tags 接口管理
 // @Accept application/json
 // @Product application/json
-// @Param data body dto.SysApiControl true "body"
+// @Param data body dto.SysApiUpdateReq true "body"
 // @Success 200 {object} response.Response	"{"code": 200, "message": "修改成功"}"
 // @Router /api/v1/sys-api/{id} [put]
 // @Security Bearer
 func (e SysApi) Update(c *gin.Context) {
-	req := dto.SysApiControl{}
+	req := dto.SysApiUpdateReq{}
 	s := service.SysApi{}
 	err := e.MakeContext(c).
 		MakeOrm().
@@ -122,23 +122,22 @@ func (e SysApi) Update(c *gin.Context) {
 // @Summary 删除接口管理
 // @Description 删除接口管理
 // @Tags 接口管理
-// @Param ids body []int false "ids"
+// @Param data body dto.SysApiDeleteReq true "body"
 // @Success 200 {object} response.Response	"{"code": 200, "message": "删除成功"}"
 // @Router /api/v1/sys-api [delete]
 // @Security Bearer
 func (e SysApi) DeleteSysApi(c *gin.Context) {
-	req := dto.SysApiById{}
+	req := dto.SysApiDeleteReq{}
 	s := service.SysApi{}
 	err := e.MakeContext(c).
 		MakeOrm().
-		Bind(&req, binding.Form).
+		Bind(&req).
 		MakeService(&s.Service).
 		Errors
 	if err != nil {
 		e.Logger.Error(err)
 		return
 	}
-	req.SetUpdateBy(user.GetUserId(c))
 	p := actions.GetPermissionFromContext(c)
 	err = s.Remove(&req, p)
 	if err != nil {

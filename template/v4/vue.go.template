@@ -78,7 +78,7 @@
                     </el-col>
                 </el-row>
 
-                <el-table v-loading="loading" :data="{{.ModuleName}}List" @selection-change="handleSelectionChange">
+                <el-table v-loading="loading" :data="{{.BusinessName}}List" @selection-change="handleSelectionChange">
                     <el-table-column type="selection" width="55" align="center"/>
                     {{- range .Columns -}}
                         {{- $x := .IsList -}}
@@ -153,11 +153,11 @@
                             {{- $x := .IsInsert -}}
                             {{- if (eq $x "1") -}}
                                 {{- if (.Pk) }}
-                                {{- else if eq .GoField "createdAt" -}}
-                                {{- else if eq .GoField "updatedAt" -}}
-                                {{- else if eq .GoField "deletedAt" -}}
-                                {{- else if eq .GoField "updateBy" -}}
-                                {{- else if eq .GoField "createBy" -}}
+                                {{- else if eq .GoField "CreatedAt" -}}
+                                {{- else if eq .GoField "UpdatedAt" -}}
+                                {{- else if eq .GoField "DeletedAt" -}}
+                                {{- else if eq .GoField "UpdateBy" -}}
+                                {{- else if eq .GoField "CreateBy" -}}
                                 {{- else }}
                                     <el-form-item label="{{.ColumnComment}}" prop="{{.JsonField}}">
                                         {{ if eq "input" .HtmlType -}}
@@ -223,27 +223,23 @@
                         <el-button @click="cancel">取 消</el-button>
                     </div>
                 </el-dialog>
-                <FileChoose ref="fileChoose" :dialog-form-visible="fileOpen" @confirm="getImgList" @close="fileClose" />
             </el-card>
         </template>
     </BasicLayout>
 </template>
 
 <script>
-    import {add{{.ClassName}}, del{{.ClassName}}, get{{.ClassName}}, list{{.ClassName}}, update{{.ClassName}}} from '@/api/{{ .BusinessName}}'
+    import {add{{.ClassName}}, del{{.ClassName}}, get{{.ClassName}}, list{{.ClassName}}, update{{.ClassName}}} from '@/api/{{ .PackageName}}/{{ .MLTBName}}'
+    {{ $package:=.PackageName }}
     {{range .Columns}}
     {{- if ne .FkTableName "" -}}
-     import {list{{.FkTableNameClass}} } from '@/api/{{ .FkTableNamePackage}}'
-
+    import {list{{.FkTableNameClass}} } from '@/api/{{ $package }}/{{ .FkTableNamePackage}}'
     {{ end -}}
     {{- end -}}
-
-    import FileChoose from '@/components/FileChoose'
 
     export default {
         name: '{{.ClassName}}',
         components: {
-            FileChoose
         },
         data() {
             return {
@@ -262,11 +258,9 @@
                 // 是否显示弹出层
                 open: false,
                 isEdit: false,
-                fileOpen: false,
-                fileIndex: undefined,
                 // 类型数据字典
                 typeOptions: [],
-                {{.ModuleName}}List: [],
+                {{.BusinessName}}List: [],
                 {{range .Columns}}
                 {{- if ne .DictType "" -}}
                 {{.JsonField}}Options: [],
@@ -296,10 +290,7 @@
                 {{- range .Columns -}}
                 {{- $x := .IsQuery -}}
                 {{- if (eq $x "1") -}}
-                {{.JsonField}}:
-                [
-                    {required: true, message: '{{.ColumnComment}}不能为空', trigger: 'blur'}
-                ],
+                {{.JsonField}}:  [ {required: true, message: '{{.ColumnComment}}不能为空', trigger: 'blur'} ],
                 {{ end }}
                 {{- end -}}
             }
@@ -309,15 +300,12 @@
             this.getList()
             {{range .Columns}}
             {{- if ne .DictType "" -}}
-
             this.getDicts('{{.DictType}}').then(response => {
                 this.{{.JsonField}}Options = response.data
             })
-
             {{ end -}}
             {{- if ne .FkTableName "" -}}
             this.get{{.FkTableNameClass}}Items()
-
             {{ end -}}
             {{- end -}}
         },
@@ -326,7 +314,7 @@
             getList() {
                 this.loading = true
                 list{{.ClassName}}(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
-                        this.{{.ModuleName}}List = response.data.list
+                        this.{{.BusinessName}}List = response.data.list
                         this.total = response.data.count
                         this.loading = false
                     }
@@ -436,7 +424,7 @@
                         if (this.form.{{.PkJsonField}} !== undefined) {
                             update{{.ClassName}}(this.form).then(response => {
                                 if (response.code === 200) {
-                                    this.msgSuccess('修改成功')
+                                    this.msgSuccess(response.msg)
                                     this.open = false
                                     this.getList()
                                 } else {
@@ -446,7 +434,7 @@
                         } else {
                             add{{.ClassName}}(this.form).then(response => {
                                 if (response.code === 200) {
-                                    this.msgSuccess('新增成功')
+                                    this.msgSuccess(response.msg)
                                     this.open = false
                                     this.getList()
                                 } else {
@@ -467,9 +455,14 @@
                     type: 'warning'
                 }).then(function () {
                       return del{{.ClassName}}( { 'ids': Ids })
-                }).then(() => {
-                    this.getList()
-                    this.msgSuccess('删除成功')
+                }).then((response) => {
+                   if (response.code === 200) {
+                     this.msgSuccess(response.msg)
+                     this.open = false
+                     this.getList()
+                   } else {
+                     this.msgError(response.msg)
+                   }
                 }).catch(function () {
                 })
             }

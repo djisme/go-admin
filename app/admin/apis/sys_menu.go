@@ -1,13 +1,11 @@
 package apis
 
 import (
-	"github.com/gin-gonic/gin/binding"
-	"go-admin/app/admin/models"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/go-admin-team/go-admin-core/sdk/api"
 	"github.com/go-admin-team/go-admin-core/sdk/pkg/jwtauth/user"
+	"go-admin/app/admin/models"
 
 	"go-admin/app/admin/service"
 	"go-admin/app/admin/service/dto"
@@ -22,13 +20,12 @@ type SysMenu struct {
 // @Description 获取JSON
 // @Tags 菜单
 // @Param menuName query string false "menuName"
-// @Param menuName query string false "menuName"
 // @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
 // @Router /api/v1/menu [get]
 // @Security Bearer
 func (e SysMenu) GetPage(c *gin.Context) {
 	s := service.SysMenu{}
-	req := dto.SysMenuSearch{}
+	req := dto.SysMenuGetPageReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, binding.Form).
@@ -57,7 +54,7 @@ func (e SysMenu) GetPage(c *gin.Context) {
 // @Router /api/v1/menu/{id} [get]
 // @Security Bearer
 func (e SysMenu) Get(c *gin.Context) {
-	req := dto.SysMenuById{}
+	req := dto.SysMenuGetReq{}
 	s := new(service.SysMenu)
 	err := e.MakeContext(c).
 		MakeOrm().
@@ -85,12 +82,12 @@ func (e SysMenu) Get(c *gin.Context) {
 // @Tags 菜单
 // @Accept  application/json
 // @Product application/json
-// @Param data body dto.SysMenuControl true "data"
+// @Param data body dto.SysMenuInsertReq true "data"
 // @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
 // @Router /api/v1/menu [post]
 // @Security Bearer
 func (e SysMenu) Insert(c *gin.Context) {
-	req := dto.SysMenuControl{}
+	req := dto.SysMenuInsertReq{}
 	s := new(service.SysMenu)
 	err := e.MakeContext(c).
 		MakeOrm().
@@ -119,12 +116,12 @@ func (e SysMenu) Insert(c *gin.Context) {
 // @Accept  application/json
 // @Product application/json
 // @Param id path int true "id"
-// @Param data body dto.SysMenuControl true "body"
+// @Param data body dto.SysMenuUpdateReq true "body"
 // @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
 // @Router /api/v1/menu/{id} [put]
 // @Security Bearer
 func (e SysMenu) Update(c *gin.Context) {
-	req := dto.SysMenuControl{}
+	req := dto.SysMenuUpdateReq{}
 	s := new(service.SysMenu)
 	err := e.MakeContext(c).
 		MakeOrm().
@@ -150,11 +147,12 @@ func (e SysMenu) Update(c *gin.Context) {
 // @Summary 删除菜单
 // @Description 删除数据
 // @Tags 菜单
-// @Param data body dto.SysMenuById true "body"
+// @Param data body dto.SysMenuDeleteReq true "body"
 // @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
 // @Router /api/v1/menu [delete]
+// @Security Bearer
 func (e SysMenu) Delete(c *gin.Context) {
-	control := new(dto.SysMenuById)
+	control := new(dto.SysMenuDeleteReq)
 	s := new(service.SysMenu)
 	err := e.MakeContext(c).
 		MakeOrm().
@@ -169,7 +167,7 @@ func (e SysMenu) Delete(c *gin.Context) {
 	err = s.Remove(control).Error
 	if err != nil {
 		e.Logger.Errorf("RemoveSysMenu error, %s", err)
-		e.Error(http.StatusInternalServerError, err, "删除失败")
+		e.Error(500, err, "删除失败")
 		return
 	}
 	e.OK(control.GetId(), "删除成功")
@@ -197,43 +195,50 @@ func (e SysMenu) GetMenuRole(c *gin.Context) {
 	result, err := s.SetMenuRole(user.GetRoleName(c))
 
 	if err != nil {
-		e.Error(http.StatusInternalServerError, err, "查询失败")
+		e.Error(500, err, "查询失败")
 		return
 	}
 
 	e.OK(result, "")
 }
 
-// GetMenuIDS 获取角色对应的菜单id数组
-// @Summary 获取角色对应的菜单id数组，设置角色权限使用
-// @Description 获取JSON
-// @Tags 菜单
-// @Param id path int true "id"
-// @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
-// @Router /api/v1/menuids/{id} [get]
-// @Security Bearer
-func (e SysMenu) GetMenuIDS(c *gin.Context) {
-	s := new(service.SysMenu)
-	err := e.MakeContext(c).
-		MakeOrm().
-		MakeService(&s.Service).
-		Errors
-	if err != nil {
-		e.Logger.Error(err)
-		e.Error(500, err, err.Error())
-		return
-	}
-	var data models.RoleMenu
-	data.RoleName = c.GetString("role")
-	data.UpdateBy = user.GetUserId(c)
-	result, err := data.GetIDS(s.Orm)
-	if err != nil {
-		e.Logger.Errorf("GetIDS error, %s", err.Error())
-		e.Error(500, err, "获取失败")
-		return
-	}
-	e.OK(result, "")
-}
+//// GetMenuIDS 获取角色对应的菜单id数组
+//// @Summary 获取角色对应的菜单id数组，设置角色权限使用
+//// @Description 获取JSON
+//// @Tags 菜单
+//// @Param id path int true "id"
+//// @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
+//// @Router /api/v1/menuids/{id} [get]
+//// @Security Bearer
+//func (e SysMenu) GetMenuIDS(c *gin.Context) {
+//	s := new(service.SysMenu)
+//	r := service.SysRole{}
+//	m := dto.SysRoleByName{}
+//	err := e.MakeContext(c).
+//		MakeOrm().
+//		Bind(&m, binding.JSON).
+//		MakeService(&s.Service).
+//		MakeService(&r.Service).
+//		Errors
+//	if err != nil {
+//		e.Logger.Error(err)
+//		e.Error(500, err, err.Error())
+//		return
+//	}
+//	var data models.SysRole
+//	err = r.GetWithName(&m, &data).Error
+//
+//	//data.RoleName = c.GetString("role")
+//	//data.UpdateBy = user.GetUserId(c)
+//	//result, err := data.GetIDS(s.Orm)
+//
+//	if err != nil {
+//		e.Logger.Errorf("GetIDS error, %s", err.Error())
+//		e.Error(500, err, "获取失败")
+//		return
+//	}
+//	e.OK(result, "")
+//}
 
 // GetMenuTreeSelect 根据角色ID查询菜单下拉树结构
 // @Summary 角色修改使用的菜单列表
@@ -248,7 +253,7 @@ func (e SysMenu) GetMenuIDS(c *gin.Context) {
 func (e SysMenu) GetMenuTreeSelect(c *gin.Context) {
 	m := service.SysMenu{}
 	r := service.SysRole{}
-	req := dto.SelectRole{}
+	req :=dto.SelectRole{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		MakeService(&m.Service).

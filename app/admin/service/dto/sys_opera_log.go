@@ -8,7 +8,7 @@ import (
 	common "go-admin/common/models"
 )
 
-type SysOperaLogSearch struct {
+type SysOperaLogGetPageReq struct {
 	dto.Pagination `search:"-"`
 	Title          string `form:"title" search:"type:contains;column:title;table:sys_opera_log" comment:"操作模块"`
 	Method         string `form:"method" search:"type:contains;column:method;table:sys_opera_log" comment:"函数"`
@@ -18,9 +18,14 @@ type SysOperaLogSearch struct {
 	Status         int    `form:"status" search:"type:exact;column:status;table:sys_opera_log" comment:"状态"`
 	BeginTime      string `form:"beginTime" search:"type:gte;column:ctime;table:sys_opera_log" comment:"创建时间"`
 	EndTime        string `form:"endTime" search:"type:lte;column:ctime;table:sys_opera_log" comment:"创建时间"`
+	SysOperaLogOrder
 }
 
-func (m *SysOperaLogSearch) GetNeedSearch() interface{} {
+type SysOperaLogOrder struct {
+	CreatedAtOrder string `search:"type:order;column:created_at;table:sys_opera_log" form:"createdAtOrder"`
+}
+
+func (m *SysOperaLogGetPageReq) GetNeedSearch() interface{} {
 	return *m
 }
 
@@ -74,19 +79,19 @@ func (s *SysOperaLogControl) GetId() interface{} {
 	return s.ID
 }
 
-type SysOperaLogById struct {
-	Id  int   `uri:"id"`
-	Ids []int `json:"ids"`
+type SysOperaLogGetReq struct {
+	Id int `uri:"id"`
 }
 
-func (s *SysOperaLogById) GetId() interface{} {
-	if len(s.Ids) > 0 {
-		s.Ids = append(s.Ids, s.Id)
-		return s.Ids
-	}
+func (s *SysOperaLogGetReq) GetId() interface{} {
 	return s.Id
 }
 
-func (s *SysOperaLogById) SetUpdateBy(id int) {
+// SysOperaLogDeleteReq 功能删除请求参数
+type SysOperaLogDeleteReq struct {
+	Ids []int `json:"ids"`
+}
 
+func (s *SysOperaLogDeleteReq) GetId() interface{} {
+	return s.Ids
 }

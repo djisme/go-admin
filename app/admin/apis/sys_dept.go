@@ -29,10 +29,10 @@ type SysDept struct {
 // @Security Bearer
 func (e SysDept) GetPage(c *gin.Context) {
 	s := service.SysDept{}
-	req := dto.SysDeptSearch{}
+	req := dto.SysDeptGetPageReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
-		Bind(&req, binding.Form).
+		Bind(&req).
 		MakeService(&s.Service).
 		Errors
 	if err != nil {
@@ -50,17 +50,16 @@ func (e SysDept) GetPage(c *gin.Context) {
 }
 
 // Get
-// @Summary 部门列表数据
+// @Summary 获取部门数据
 // @Description 获取JSON
 // @Tags 部门
 // @Param deptId path string false "deptId"
-// @Param position query string false "position"
 // @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
 // @Router /api/v1/dept/{deptId} [get]
 // @Security Bearer
 func (e SysDept) Get(c *gin.Context) {
 	s := service.SysDept{}
-	req := dto.SysDeptById{}
+	req := dto.SysDeptGetReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, binding.JSON, nil).
@@ -95,10 +94,10 @@ func (e SysDept) Get(c *gin.Context) {
 // @Security Bearer
 func (e SysDept) Insert(c *gin.Context) {
 	s := service.SysDept{}
-	req := dto.SysDeptControl{}
+	req := dto.SysDeptInsertReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
-		Bind(&req, binding.JSON, nil).
+		Bind(&req, binding.JSON).
 		MakeService(&s.Service).
 		Errors
 	if err != nil {
@@ -131,10 +130,10 @@ func (e SysDept) Insert(c *gin.Context) {
 // @Security Bearer
 func (e SysDept) Update(c *gin.Context) {
 	s := service.SysDept{}
-	req := dto.SysDeptControl{}
+	req := dto.SysDeptUpdateReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
-		Bind(&req, binding.JSON, nil).
+		Bind(&req).
 		MakeService(&s.Service).
 		Errors
 	if err != nil {
@@ -159,9 +158,10 @@ func (e SysDept) Update(c *gin.Context) {
 // @Success 200 {string} string	"{"code": 200, "message": "删除成功"}"
 // @Success 200 {string} string	"{"code": -1, "message": "删除失败"}"
 // @Router /api/v1/dept [delete]
+// @Security Bearer
 func (e SysDept) Delete(c *gin.Context) {
 	s := service.SysDept{}
-	req := dto.SysDeptById{}
+	req := dto.SysDeptDeleteReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, binding.JSON, nil).
@@ -184,7 +184,7 @@ func (e SysDept) Delete(c *gin.Context) {
 // Get2Tree 用户管理 左侧部门树
 func (e SysDept) Get2Tree(c *gin.Context) {
 	s := service.SysDept{}
-	req := dto.SysDeptSearch{}
+	req := dto.SysDeptGetPageReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req,binding.Form).

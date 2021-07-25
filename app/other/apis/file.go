@@ -40,6 +40,7 @@ type File struct {
 // @Success 200 {string} string	"{"code": 200, "message": "添加成功"}"
 // @Success 200 {string} string	"{"code": -1, "message": "添加失败"}"
 // @Router /api/v1/public/uploadFile [post]
+// @Security Bearer
 func (e File) UploadFile(c *gin.Context) {
 	e.MakeContext(c)
 	tag, _ := c.GetPostForm("type")
@@ -101,8 +102,8 @@ func (e File) baseImg(c *gin.Context, fileResponse FileResponse, urlPerfix strin
 		return fileResponse
 	}
 	if source != "1" {
-		fileResponse.Path = "https://youshikeji.oss-cn-shanghai.aliyuncs.com/img/" + fileName
-		fileResponse.FullPath = "https://youshikeji.oss-cn-shanghai.aliyuncs.com/img/" + fileName
+		fileResponse.Path = "/static/uploadfile/" + fileName
+		fileResponse.FullPath = "/static/uploadfile/" + fileName
 	}
 	return fileResponse
 }
@@ -135,8 +136,8 @@ func (e File) multipleFile(c *gin.Context, urlPerfix string) []FileResponse {
 					Type:     fileType,
 				}
 				if source != "1" {
-					fileResponse.Path = "https://youshikeji.oss-cn-shanghai.aliyuncs.com/img/" + fileName
-					fileResponse.FullPath = "https://youshikeji.oss-cn-shanghai.aliyuncs.com/img/" + fileName
+					fileResponse.Path = "/static/uploadfile/" + fileName
+					fileResponse.FullPath = "/static/uploadfile/" + fileName
 				}
 				multipartFile = append(multipartFile, fileResponse)
 			}
@@ -171,14 +172,14 @@ func (e File) singleFile(c *gin.Context, fileResponse FileResponse, urlPerfix st
 		Name:     files.Filename,
 		Type:     fileType,
 	}
-	source, _ := c.GetPostForm("source")
-	err = thirdUpload(source, fileName, singleFile)
-	if err != nil {
-		e.Error(200, errors.New(""), "上传第三方失败")
-		return FileResponse{}, true
-	}
-	fileResponse.Path = "https://youshikeji.oss-cn-shanghai.aliyuncs.com/img/" + fileName
-	fileResponse.FullPath = "https://youshikeji.oss-cn-shanghai.aliyuncs.com/img/" + fileName
+	//source, _ := c.GetPostForm("source")
+	//err = thirdUpload(source, fileName, singleFile)
+	//if err != nil {
+	//	e.Error(200, errors.New(""), "上传第三方失败")
+	//	return FileResponse{}, true
+	//}
+	fileResponse.Path = "/static/uploadfile/" + fileName
+	fileResponse.FullPath = "/static/uploadfile/" + fileName
 	return fileResponse, false
 }
 

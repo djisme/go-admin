@@ -15,8 +15,8 @@ type SysLoginLog struct {
 	service.Service
 }
 
-// GetSysLoginLogPage 获取SysLoginLog列表
-func (e *SysLoginLog) GetPage(c *dto.SysLoginLogSearch, list *[]models.SysLoginLog, count *int64) error {
+// GetPage 获取SysLoginLog列表
+func (e *SysLoginLog) GetPage(c *dto.SysLoginLogGetPageReq, list *[]models.SysLoginLog, count *int64) error {
 	var err error
 	var data models.SysLoginLog
 
@@ -34,8 +34,8 @@ func (e *SysLoginLog) GetPage(c *dto.SysLoginLogSearch, list *[]models.SysLoginL
 	return nil
 }
 
-// GetSysLoginLog 获取SysLoginLog对象
-func (e *SysLoginLog) Get(d *dto.SysLoginLogById, model *models.SysLoginLog) error {
+// Get 获取SysLoginLog对象
+func (e *SysLoginLog) Get(d *dto.SysLoginLogGetReq, model *models.SysLoginLog) error {
 	var err error
 	db := e.Orm.First(model, d.GetId())
 	err = db.Error
@@ -51,12 +51,12 @@ func (e *SysLoginLog) Get(d *dto.SysLoginLogById, model *models.SysLoginLog) err
 	return nil
 }
 
-// RemoveSysLoginLog 删除SysLoginLog
-func (e *SysLoginLog) Remove(c *dto.SysLoginLogById) error {
+// Remove 删除SysLoginLog
+func (e *SysLoginLog) Remove(c *dto.SysLoginLogDeleteReq) error {
 	var err error
 	var data models.SysLoginLog
 
-	db := e.Orm.Delete(&data, c.Ids)
+	db := e.Orm.Delete(&data, c.GetId())
 	if db.Error != nil {
 		err = db.Error
 		e.Log.Errorf("Delete error: %s", err)

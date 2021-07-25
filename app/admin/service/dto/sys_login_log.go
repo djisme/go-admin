@@ -1,14 +1,12 @@
 package dto
 
 import (
-	"go-admin/app/admin/models"
 	"time"
 
 	"go-admin/common/dto"
-	common "go-admin/common/models"
 )
 
-type SysLoginLogSearch struct {
+type SysLoginLogGetPageReq struct {
 	dto.Pagination `search:"-"`
 	Username       string `form:"username" search:"type:exact;column:username;table:sys_login_log" comment:"用户名"`
 	Status         string `form:"status" search:"type:exact;column:status;table:sys_login_log" comment:"状态"`
@@ -16,13 +14,14 @@ type SysLoginLogSearch struct {
 	LoginLocation  string `form:"loginLocation" search:"type:exact;column:login_location;table:sys_login_log" comment:"归属地"`
 	BeginTime      string `form:"beginTime" search:"type:gte;column:ctime;table:sys_login_log" comment:"创建时间"`
 	EndTime        string `form:"endTime" search:"type:lte;column:ctime;table:sys_login_log" comment:"创建时间"`
+	SysLoginLogOrder
 }
 
 type SysLoginLogOrder struct {
-	HandleOrder string `search:"type:order;column:created_at;table:sys_login_log" form:"createdAtOrder"`
+	CreatedAtOrder string `search:"type:order;column:created_at;table:sys_login_log" form:"createdAtOrder"`
 }
 
-func (m *SysLoginLogSearch) GetNeedSearch() interface{} {
+func (m *SysLoginLogGetPageReq) GetNeedSearch() interface{} {
 	return *m
 }
 
@@ -40,41 +39,19 @@ type SysLoginLogControl struct {
 	Msg           string    `json:"msg" comment:"信息"`
 }
 
-func (s *SysLoginLogControl) Generate() (*models.SysLoginLog, error) {
-	return &models.SysLoginLog{
-		Model:         common.Model{Id: s.ID},
-		Username:      s.Username,
-		Status:        s.Status,
-		Ipaddr:        s.Ipaddr,
-		LoginLocation: s.LoginLocation,
-		Browser:       s.Browser,
-		Os:            s.Os,
-		Platform:      s.Platform,
-		LoginTime:     s.LoginTime,
-		Remark:        s.Remark,
-		Msg:           s.Msg,
-	}, nil
+type SysLoginLogGetReq struct {
+	Id int `uri:"id"`
 }
 
-func (s *SysLoginLogControl) GetId() interface{} {
-	return s.ID
-}
-
-type SysLoginLogById struct {
-	Id  int   `uri:"id"`
-	Ids []int `json:"ids"`
-	common.ControlBy
-}
-
-func (s *SysLoginLogById) GetId() interface{} {
+func (s *SysLoginLogGetReq) GetId() interface{} {
 	return s.Id
 }
 
-func (s *SysLoginLogById) Generate() *SysLoginLogById {
-	cp := *s
-	return &cp
+// SysLoginLogDeleteReq 功能删除请求参数
+type SysLoginLogDeleteReq struct {
+	Ids []int `json:"ids"`
 }
 
-func (s *SysLoginLogById) GenerateM() (*models.SysLoginLog, error) {
-	return &models.SysLoginLog{}, nil
+func (s *SysLoginLogDeleteReq) GetId() interface{} {
+	return s.Ids
 }

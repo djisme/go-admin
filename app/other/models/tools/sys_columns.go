@@ -51,12 +51,20 @@ func (SysColumns) TableName() string {
 	return "sys_columns"
 }
 
-func (e *SysColumns) GetList(tx *gorm.DB) ([]SysColumns, error) {
+func (e *SysColumns) GetList(tx *gorm.DB, exclude bool) ([]SysColumns, error) {
 	var doc []SysColumns
-
 	table := tx.Table("sys_columns")
-
-	table = table.Where("table_id = ?", e.TableId)
+	table = table.Where("table_id = ? ", e.TableId)
+	if exclude {
+		notIn := make([]string, 6)
+		notIn = append(notIn, "id")
+		notIn = append(notIn, "create_by")
+		notIn = append(notIn, "update_by")
+		notIn = append(notIn, "created_at")
+		notIn = append(notIn, "updated_at")
+		notIn = append(notIn, "deleted_at")
+		table = table.Where(" column_name not in(?)", notIn)
+	}
 
 	if err := table.Find(&doc).Error; err != nil {
 		return nil, err

@@ -30,10 +30,10 @@ type SysUser struct {
 // @Security Bearer
 func (e SysUser) GetPage(c *gin.Context) {
 	s := service.SysUser{}
-	req := dto.SysUserSearch{}
+	req :=dto.SysUserGetPageReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
-		Bind(&req, binding.Form).
+		Bind(&req).
 		MakeService(&s.Service).
 		Errors
 	if err != nil {
@@ -48,7 +48,7 @@ func (e SysUser) GetPage(c *gin.Context) {
 	list := make([]models.SysUser, 0)
 	var count int64
 
-	err = s.GetSysUserPage(&req, p, &list, &count)
+	err = s.GetPage(&req, p, &list, &count)
 	if err != nil {
 		e.Error(500, err, "查询失败")
 		return
@@ -63,11 +63,11 @@ func (e SysUser) GetPage(c *gin.Context) {
 // @Tags 用户
 // @Param userId path int true "用户编码"
 // @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
-// @Router /api/v1/sysUser/{userId} [get]
+// @Router /api/v1/sys-user/{userId} [get]
 // @Security Bearer
 func (e SysUser) Get(c *gin.Context) {
 	s := service.SysUser{}
-	req := dto.SysUserById{}
+	req :=dto.SysUserById{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, nil).
@@ -81,7 +81,7 @@ func (e SysUser) Get(c *gin.Context) {
 	var object models.SysUser
 	//数据权限检查
 	p := actions.GetPermissionFromContext(c)
-	err = s.GetSysUser(&req, p, &object)
+	err = s.Get(&req, p, &object)
 	if err != nil {
 		e.Error(http.StatusUnprocessableEntity, err, "查询失败")
 		return
@@ -95,12 +95,13 @@ func (e SysUser) Get(c *gin.Context) {
 // @Tags 用户
 // @Accept  application/json
 // @Product application/json
-// @Param data body dto.SysUserControl true "用户数据"
+// @Param data body dto.SysUserInsertReq true "用户数据"
 // @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
-// @Router /api/v1/sysUser [post]
+// @Router /api/v1/sys-user [post]
+// @Security Bearer
 func (e SysUser) Insert(c *gin.Context) {
 	s := service.SysUser{}
-	req := dto.SysUserControl{}
+	req :=dto.SysUserInsertReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, binding.JSON).
@@ -113,7 +114,7 @@ func (e SysUser) Insert(c *gin.Context) {
 	}
 	// 设置创建人
 	req.SetCreateBy(user.GetUserId(c))
-	err = s.InsertSysUser(&req)
+	err = s.Insert(&req)
 	if err != nil {
 		e.Logger.Error(err)
 		e.Error(500, err, err.Error())
@@ -129,15 +130,16 @@ func (e SysUser) Insert(c *gin.Context) {
 // @Tags 用户
 // @Accept  application/json
 // @Product application/json
-// @Param data body dto.SysUserControl true "body"
+// @Param data body dto.SysUserUpdateReq true "body"
 // @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
 // @Router /api/v1/sys-user/{userId} [put]
+// @Security Bearer
 func (e SysUser) Update(c *gin.Context) {
 	s := service.SysUser{}
-	req := dto.SysUserControl{}
+	req :=dto.SysUserUpdateReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
-		Bind(&req, binding.JSON, nil).
+		Bind(&req).
 		MakeService(&s.Service).
 		Errors
 	if err != nil {
@@ -151,7 +153,7 @@ func (e SysUser) Update(c *gin.Context) {
 	//数据权限检查
 	p := actions.GetPermissionFromContext(c)
 
-	err = s.UpdateSysUser(&req, p)
+	err = s.Update(&req, p)
 	if err != nil {
 		e.Logger.Error(err)
 		return
@@ -166,9 +168,10 @@ func (e SysUser) Update(c *gin.Context) {
 // @Param userId path int true "userId"
 // @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
 // @Router /api/v1/sys-user/{userId} [delete]
+// @Security Bearer
 func (e SysUser) Delete(c *gin.Context) {
 	s := service.SysUser{}
-	req := dto.SysUserById{}
+	req :=dto.SysUserById{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, binding.JSON).
@@ -186,7 +189,7 @@ func (e SysUser) Delete(c *gin.Context) {
 	// 数据权限检查
 	p := actions.GetPermissionFromContext(c)
 
-	err = s.RemoveSysUser(&req, p)
+	err = s.Remove(&req, p)
 	if err != nil {
 		e.Logger.Error(err)
 		return
@@ -202,9 +205,10 @@ func (e SysUser) Delete(c *gin.Context) {
 // @Param file formData file true "file"
 // @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
 // @Router /api/v1/user/avatar [post]
+// @Security Bearer
 func (e SysUser) InsetAvatar(c *gin.Context) {
 	s := service.SysUser{}
-	req := dto.SysUserControl{}
+	req :=dto.UpdateSysUserAvatarReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		MakeService(&s.Service).
@@ -233,7 +237,7 @@ func (e SysUser) InsetAvatar(c *gin.Context) {
 	req.UserId = p.UserId
 	req.Avatar = "/" + filPath
 
-	err = s.UpdateSysUser(&req, p)
+	err = s.UpdateAvatar(&req, p)
 	if err != nil {
 		e.Logger.Error(err)
 		return
@@ -250,9 +254,10 @@ func (e SysUser) InsetAvatar(c *gin.Context) {
 // @Param data body dto.UpdateSysUserStatusReq true "body"
 // @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
 // @Router /api/v1/user/status [put]
+// @Security Bearer
 func (e SysUser) UpdateStatus(c *gin.Context) {
 	s := service.SysUser{}
-	req := dto.UpdateSysUserStatusReq{}
+	req :=dto.UpdateSysUserStatusReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, binding.JSON, nil).
@@ -269,7 +274,7 @@ func (e SysUser) UpdateStatus(c *gin.Context) {
 	//数据权限检查
 	p := actions.GetPermissionFromContext(c)
 
-	err = s.UpdateSysUserStatus(&req, p)
+	err = s.UpdateStatus(&req, p)
 	if err != nil {
 		e.Logger.Error(err)
 		return
@@ -286,9 +291,10 @@ func (e SysUser) UpdateStatus(c *gin.Context) {
 // @Param data body dto.ResetSysUserPwdReq true "body"
 // @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
 // @Router /api/v1/user/pwd/reset [put]
+// @Security Bearer
 func (e SysUser) ResetPwd(c *gin.Context) {
 	s := service.SysUser{}
-	req := dto.ResetSysUserPwdReq{}
+	req :=dto.ResetSysUserPwdReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, binding.JSON).
@@ -305,7 +311,7 @@ func (e SysUser) ResetPwd(c *gin.Context) {
 	//数据权限检查
 	p := actions.GetPermissionFromContext(c)
 
-	err = s.ResetSysUserPwd(&req, p)
+	err = s.ResetPwd(&req, p)
 	if err != nil {
 		e.Logger.Error(err)
 		return
@@ -321,11 +327,11 @@ func (e SysUser) ResetPwd(c *gin.Context) {
 // @Product application/json
 // @Param data body dto.PassWord true "body"
 // @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
-// @Router /api/v1/user/pwd [post]
+// @Router /api/v1/user/pwd/set [put]
 // @Security Bearer
 func (e SysUser) UpdatePwd(c *gin.Context) {
 	s := service.SysUser{}
-	req := dto.PassWord{}
+	req :=dto.PassWord{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req).
@@ -340,7 +346,7 @@ func (e SysUser) UpdatePwd(c *gin.Context) {
 	// 数据权限检查
 	p := actions.GetPermissionFromContext(c)
 
-	err = s.UpdateSysUserPwd(user.GetUserId(c), req.OldPassword, req.NewPassword, p)
+	err = s.UpdatePwd(user.GetUserId(c), req.OldPassword, req.NewPassword, p)
 	if err != nil {
 		e.Logger.Error(err)
 		e.Error(http.StatusForbidden, err, "密码修改失败")
@@ -358,7 +364,7 @@ func (e SysUser) UpdatePwd(c *gin.Context) {
 // @Security Bearer
 func (e SysUser) GetProfile(c *gin.Context) {
 	s := service.SysUser{}
-	req := dto.SysUserById{}
+	req :=dto.SysUserById{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		MakeService(&s.Service).
@@ -374,7 +380,7 @@ func (e SysUser) GetProfile(c *gin.Context) {
 	sysUser := models.SysUser{}
 	roles := make([]models.SysRole, 0)
 	posts := make([]models.SysPost, 0)
-	err = s.GetSysUserProfile(&req, &sysUser, &roles, &posts)
+	err = s.GetProfile(&req, &sysUser, &roles, &posts)
 	if err != nil {
 		e.Logger.Errorf("get user profile error, %s", err.Error())
 		e.Error(500, err, "获取用户信息失败")
@@ -395,10 +401,12 @@ func (e SysUser) GetProfile(c *gin.Context) {
 // @Router /api/v1/getinfo [get]
 // @Security Bearer
 func (e SysUser) GetInfo(c *gin.Context) {
-	req := dto.SysUserById{}
+	req :=dto.SysUserById{}
 	s := service.SysUser{}
+	r := service.SysRole{}
 	err := e.MakeContext(c).
 		MakeOrm().
+		MakeService(&r.Service).
 		MakeService(&s.Service).
 		Errors
 	if err != nil {
@@ -413,21 +421,20 @@ func (e SysUser) GetInfo(c *gin.Context) {
 	permissions[0] = "*:*:*"
 	var buttons = make([]string, 1)
 	buttons[0] = "*:*:*"
-	RoleMenu := models.RoleMenu{}
-	RoleMenu.RoleId = user.GetRoleId(c)
+
 	var mp = make(map[string]interface{})
 	mp["roles"] = roles
 	if user.GetRoleName(c) == "admin" || user.GetRoleName(c) == "系统管理员" {
 		mp["permissions"] = permissions
 		mp["buttons"] = buttons
 	} else {
-		list, _ := RoleMenu.GetPermis(e.Orm)
+		list, _ := r.GetById(user.GetRoleId(c))
 		mp["permissions"] = list
 		mp["buttons"] = list
 	}
 	sysUser := models.SysUser{}
 	req.Id = user.GetUserId(c)
-	err = s.GetSysUser(&req, p, &sysUser)
+	err = s.Get(&req, p, &sysUser)
 	if err != nil {
 		e.Error(http.StatusUnauthorized, err, "登录失败")
 		return
@@ -441,5 +448,6 @@ func (e SysUser) GetInfo(c *gin.Context) {
 	mp["userId"] = sysUser.UserId
 	mp["deptId"] = sysUser.DeptId
 	mp["name"] = sysUser.NickName
+	mp["code"] = 200
 	e.OK(mp, "")
 }

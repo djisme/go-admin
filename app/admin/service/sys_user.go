@@ -18,8 +18,8 @@ type SysUser struct {
 	service.Service
 }
 
-// GetSysUserPage 获取SysUser列表
-func (e *SysUser) GetSysUserPage(c *dto.SysUserSearch, p *actions.DataPermission, list *[]models.SysUser, count *int64) error {
+// GetPage 获取SysUser列表
+func (e *SysUser) GetPage(c *dto.SysUserGetPageReq, p *actions.DataPermission, list *[]models.SysUser, count *int64) error {
 	var err error
 	var data models.SysUser
 
@@ -38,8 +38,8 @@ func (e *SysUser) GetSysUserPage(c *dto.SysUserSearch, p *actions.DataPermission
 	return nil
 }
 
-// GetSysUser 获取SysUser对象
-func (e *SysUser) GetSysUser(d *dto.SysUserById, p *actions.DataPermission, model *models.SysUser) error {
+// Get 获取SysUser对象
+func (e *SysUser) Get(d *dto.SysUserById, p *actions.DataPermission, model *models.SysUser) error {
 	var data models.SysUser
 
 	err := e.Orm.Model(&data).Debug().
@@ -59,8 +59,8 @@ func (e *SysUser) GetSysUser(d *dto.SysUserById, p *actions.DataPermission, mode
 	return nil
 }
 
-// InsertSysUser 创建SysUser对象
-func (e *SysUser) InsertSysUser(c *dto.SysUserControl) error {
+// Insert 创建SysUser对象
+func (e *SysUser) Insert(c *dto.SysUserInsertReq) error {
 	var err error
 	var data models.SysUser
 	var i int64
@@ -83,8 +83,37 @@ func (e *SysUser) InsertSysUser(c *dto.SysUserControl) error {
 	return nil
 }
 
-// UpdateSysUser 修改SysUser对象
-func (e *SysUser) UpdateSysUser(c *dto.SysUserControl, p *actions.DataPermission) error {
+// Update 修改SysUser对象
+func (e *SysUser) Update(c *dto.SysUserUpdateReq, p *actions.DataPermission) error {
+	var err error
+	var model models.SysUser
+	db := e.Orm.Scopes(
+		actions.Permission(model.TableName(), p),
+	).First(&model, c.GetId())
+	if err = db.Error; err != nil {
+		e.Log.Errorf("Service UpdateSysUser error: %s", err)
+		return err
+	}
+	if db.RowsAffected == 0 {
+		return errors.New("无权更新该数据")
+
+	}
+	c.Generate(&model)
+	update := e.Orm.Model(&model).Where("user_id = ?", &model.UserId).Omit("password", "salt").Updates(&model)
+	if err = update.Error; err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+	if update.RowsAffected == 0 {
+		err = errors.New("update userinfo error")
+		log.Warnf("db update error")
+		return err
+	}
+	return nil
+}
+
+// UpdateAvatar 更新用户头像
+func (e *SysUser) UpdateAvatar(c *dto.UpdateSysUserAvatarReq, p *actions.DataPermission) error {
 	var err error
 	var model models.SysUser
 	db := e.Orm.Scopes(
@@ -107,8 +136,8 @@ func (e *SysUser) UpdateSysUser(c *dto.SysUserControl, p *actions.DataPermission
 	return nil
 }
 
-// UpdateSysUserStatus 更新用户状态
-func (e *SysUser) UpdateSysUserStatus(c *dto.UpdateSysUserStatusReq, p *actions.DataPermission) error {
+// UpdateStatus 更新用户状态
+func (e *SysUser) UpdateStatus(c *dto.UpdateSysUserStatusReq, p *actions.DataPermission) error {
 	var err error
 	var model models.SysUser
 	db := e.Orm.Scopes(
@@ -131,8 +160,8 @@ func (e *SysUser) UpdateSysUserStatus(c *dto.UpdateSysUserStatusReq, p *actions.
 	return nil
 }
 
-// ResetSysUserPwd 重置用户密码
-func (e *SysUser) ResetSysUserPwd(c *dto.ResetSysUserPwdReq, p *actions.DataPermission) error {
+// ResetPwd 重置用户密码
+func (e *SysUser) ResetPwd(c *dto.ResetSysUserPwdReq, p *actions.DataPermission) error {
 	var err error
 	var model models.SysUser
 	db := e.Orm.Scopes(
@@ -154,8 +183,8 @@ func (e *SysUser) ResetSysUserPwd(c *dto.ResetSysUserPwdReq, p *actions.DataPerm
 	return nil
 }
 
-// RemoveSysUser 删除SysUser
-func (e *SysUser) RemoveSysUser(c *dto.SysUserById, p *actions.DataPermission) error {
+// Remove 删除SysUser
+func (e *SysUser) Remove(c *dto.SysUserById, p *actions.DataPermission) error {
 	var err error
 	var data models.SysUser
 
@@ -173,8 +202,8 @@ func (e *SysUser) RemoveSysUser(c *dto.SysUserById, p *actions.DataPermission) e
 	return nil
 }
 
-// UpdateSysUserPwd 修改SysUser对象密码
-func (e *SysUser) UpdateSysUserPwd(id int, oldPassword, newPassword string, p *actions.DataPermission) error {
+// UpdatePwd 修改SysUser对象密码
+func (e *SysUser) UpdatePwd(id int, oldPassword, newPassword string, p *actions.DataPermission) error {
 	var err error
 
 	if newPassword == "" {
@@ -219,7 +248,7 @@ func (e *SysUser) UpdateSysUserPwd(id int, oldPassword, newPassword string, p *a
 	return nil
 }
 
-func (e *SysUser) GetSysUserProfile(c *dto.SysUserById, user *models.SysUser, roles *[]models.SysRole, posts *[]models.SysPost) error {
+func (e *SysUser) GetProfile(c *dto.SysUserById, user *models.SysUser, roles *[]models.SysRole, posts *[]models.SysPost) error {
 	err := e.Orm.Preload("Dept").First(user, c.GetId()).Error
 	if err != nil {
 		return err
