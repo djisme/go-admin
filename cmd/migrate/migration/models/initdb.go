@@ -11,9 +11,17 @@ import (
 
 func InitDb(db *gorm.DB) (err error) {
 	filePath := "config/db.sql"
-	err = ExecSql(db, filePath)
 	if global.Driver == "postgres" {
 		filePath = "config/pg.sql"
+		err = ExecSql(db, filePath)
+	} else if global.Driver == "mysql" {
+		filePath = "config/db-begin-mysql.sql"
+		err = ExecSql(db, filePath)
+		filePath = "config/db.sql"
+		err = ExecSql(db, filePath)
+		filePath = "config/db-end-mysql.sql"
+		err = ExecSql(db, filePath)
+	} else {
 		err = ExecSql(db, filePath)
 	}
 	return err
@@ -31,7 +39,7 @@ func ExecSql(db *gorm.DB, filePath string) error {
 			fmt.Println(sqlList[i])
 			continue
 		}
-		sql := strings.Replace(sqlList[i]+";", "\n", "", 0)
+		sql := strings.Replace(sqlList[i]+";", "\n", "", -1)
 		sql = strings.TrimSpace(sql)
 		if err = db.Exec(sql).Error; err != nil {
 			log.Printf("error sql: %s", sql)
