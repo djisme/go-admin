@@ -27,7 +27,7 @@ require (
 	github.com/swaggo/swag v1.6.7
 	github.com/unrolled/secure v1.0.8
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
-	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
+	//golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	gorm.io/driver/mysql v1.0.4-0.20201206014609-ae5fd10184f6
 	gorm.io/driver/postgres v1.0.6-0.20201208020313-1ed927cfab53
 	gorm.io/driver/sqlite v1.1.5-0.20201206014648-c84401fbe3ba
