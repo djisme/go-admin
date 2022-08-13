@@ -17,6 +17,7 @@ import (
 	"go-admin/common/actions"
 )
 
+//我把项目git管理起来了！
 type SysUser struct {
 	api.Api
 }
